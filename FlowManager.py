@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List
 from enum import Enum
 import random
+import asyncio
 
 app = FastAPI(title="Flow Manager API")
 
@@ -35,20 +36,20 @@ class Outcomes(Enum):
     FAILURE = "failure"
 
 class Task:
-    def task1():
+    async def task1():
         print("Executing Task 1: Fetch data")
         success = random_success()
         print(f"Task 1 completed with status: {success}")
         return {"status": success, "data": {"value": random.randint(1, 100)}}
 
-    def task2(data):
+    async def task2(data):
         print("Executing Task 2: Process data")
         if "value" in data:
             processed = data["value"] * 2
             return {"status": random_success(), "data": {"processed": processed}}
         return {"status": Outcomes.FAILURE.value}
 
-    def task3(data):
+    async def task3(data):
         print("Executing Task 3: Store data")
         if "processed" in data:
             print(f"Data stored: {data['processed']}")
@@ -64,7 +65,7 @@ TASK_FUNCTIONS = {
 def random_success():
     return Outcomes.SUCCESS.value if random.choice([True, False]) else Outcomes.FAILURE.value
 
-def exec_flow(flow: Flow):
+async def exec_flow(flow: Flow):
     current_task = flow.start_task
     task_results = {}
 
@@ -76,9 +77,9 @@ def exec_flow(flow: Flow):
             raise HTTPException(status_code=400, detail=f"Task {current_task} not implemented")
 
         if task_results:
-            result = task_func(task_results.get("data", {}))
+            result = await task_func(task_results.get("data", {}))
         else:
-            result = task_func()
+            result = await task_func()
 
         task_results = result
 
@@ -95,7 +96,7 @@ def exec_flow(flow: Flow):
     return {"flow_id": flow.id, "status": task_results["status"], "results": task_results}
 
 @app.post("/exec_flow")
-def run_flow(flow_request: FlowRequest):
+async def run_flow(flow_request: FlowRequest):
     flow = flow_request.flow
-    result = exec_flow(flow)
+    result = await exec_flow(flow)
     return result
