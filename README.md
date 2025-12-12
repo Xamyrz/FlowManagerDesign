@@ -1,6 +1,6 @@
 # Flow Manager Design
 
-Explanation of the flow design:
+## Explanation of the flow design:
 How do the tasks depend on one another?
   - ##### Tasks depend on one another based on the result they provide and the conditions that are bound to them in the `outcome, target_task_success, target_task_failure` fields.
 How is the success or failure of a task evaluated?
@@ -8,9 +8,9 @@ How is the success or failure of a task evaluated?
  What happens if a task fails or succeeds?
  - ##### When a task succeeds, the flow manager checks the condition, if the conditions `outcome` field matches the outcome of the task, it proceeds to task in the `target_task_success` field. If the tasks fails and outcome does not match the conditions `outcome` field that this task is assigned to in `source_task`. the flow ends its process
  
+ ##
  
- 
- ##Running this project
+ ### Running this project
 install packages using ` pip install "fastapi[standard]" fastapi pydantic typing`
 
 run `fastapi dev .\FlowManager.py` and open http://127.0.0.1:8000/docs
